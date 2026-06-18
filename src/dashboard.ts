@@ -28,6 +28,16 @@ function fmtWater(l: number): string {
 function fmtMiles(mi: number): string {
   return mi >= 0.1 ? `${mi.toFixed(2)} mi` : `${(mi * 5280).toFixed(0)} ft`;
 }
+/** Compact carbon: grams under 1kg, else kilograms. */
+function fmtCarbon(g: number): string {
+  return g >= 1000 ? `${(g / 1000).toFixed(1)} kg` : `${g.toFixed(g < 10 ? 1 : 0)} g`;
+}
+/** Compact counts: 7,746 -> 7.7k, 1,200,000 -> 1.2M. */
+function fmtCount(n: number): string {
+  if (n >= 1_000_000) return `${(n / 1_000_000).toFixed(1)}M`;
+  if (n >= 1000) return `${(n / 1000).toFixed(1)}k`;
+  return `${n}`;
+}
 
 /** A horizontal bar chart as inline SVG. */
 function barChart(rows: { label: string; value: number; sub: string }[], unit: string): string {
@@ -36,16 +46,20 @@ function barChart(rows: { label: string; value: number; sub: string }[], unit: s
   const rowH = 34;
   const w = 760;
   const labelW = 150;
-  const barMax = w - labelW - 90;
+  const valueW = 150; // reserved right column for the value label
+  const barMax = w - labelW - valueW;
+  const charW = 6.2; // approx width of a 12px char, to keep text inside the viewBox
   const h = rows.length * rowH + 10;
   const bars = rows
     .map((r, i) => {
       const y = i * rowH + 6;
       const bw = Math.max(2, (r.value / max) * barMax);
+      // Clamp the text x so its right edge never runs past the viewBox.
+      const tx = Math.min(labelW + bw + 8, w - r.sub.length * charW - 4);
       return `
       <text x="0" y="${y + 16}" class="bl">${esc(r.label.length > 22 ? r.label.slice(0, 21) + "…" : r.label)}</text>
       <rect x="${labelW}" y="${y + 4}" width="${bw}" height="18" rx="4" class="bar"/>
-      <text x="${labelW + bw + 8}" y="${y + 17}" class="bv">${esc(r.sub)}</text>`;
+      <text x="${tx.toFixed(0)}" y="${y + 17}" class="bv">${esc(r.sub)}</text>`;
     })
     .join("");
   return `<svg viewBox="0 0 ${w} ${h}" class="chart" role="img" aria-label="${unit} by model">${bars}</svg>`;
@@ -95,7 +109,7 @@ export function buildDashboardHtml(store: ImpactStore, opts: DashboardOptions = 
         { model: r.model, inputTokens: r.inputTokens, outputTokens: r.outputTokens },
         scenario,
       );
-      return { label: r.model, value: im.co2eGrams, sub: `${im.co2eGrams.toFixed(1)} g · ${r.events} reqs`, energy: im.energyKwh };
+      return { label: r.model, value: im.co2eGrams, sub: `${fmtCarbon(im.co2eGrams)} · ${fmtCount(r.events)} reqs`, energy: im.energyKwh };
     })
     .sort((a, b) => b.value - a.value);
 
