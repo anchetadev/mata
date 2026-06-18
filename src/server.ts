@@ -17,14 +17,17 @@
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js";
 import { z } from "zod";
-import { readFileSync } from "node:fs";
+import { readFileSync, writeFileSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 import { dirname, join } from "node:path";
+import { homedir } from "node:os";
 
 import { calculateImpact, formatImpact, type Scenario } from "./engine/index.js";
 import { ImpactStore } from "./store/db.js";
 import { buildReport, renderReport, type Period } from "./reporting.js";
 import { scoreEfficiency, type Turn } from "./efficiency/score.js";
+import { analyzeRecentSessions } from "./efficiency/session.js";
+import { buildDashboardHtml } from "./dashboard.js";
 import { scanDir } from "./collectors/claude-code-collector.js";
 import { estimateTurns, type ChatTurn } from "./collectors/estimate.js";
 import { parseWebTranscript } from "./collectors/claude-web-parse.js";
@@ -167,6 +170,38 @@ server.registerTool(
   },
 );
 
+// ── analyze_efficiency ────────────────────────────────────────────────────────
+server.registerTool(
+  "analyze_efficiency",
+  {
+    title: "Analyze prompt efficiency of recent sessions",
+    description:
+      "Run the efficiency coach over your most recent Claude Code sessions (reads transcript text on-demand, never stores it). Returns per-session scores, an average, wasted-rework tokens, and your top recurring tips.",
+    inputSchema: {
+      limit: z.number().int().min(1).max(50).default(5).describe("How many recent sessions to analyze."),
+      dir: z.string().optional(),
+    },
+  },
+  async (a) => {
+    const ov = analyzeRecentSessions(a.dir, a.limit ?? 5);
+    if (ov.sessionsAnalyzed === 0) return text("No Claude Code sessions with user turns found to analyze.");
+    const lines: string[] = [];
+    lines.push(`# Efficiency coach — last ${ov.sessionsAnalyzed} session(s)\n`);
+    lines.push(`Average score: ${ov.averageScore}/100 · rework redone ≈ ${ov.totalReworkWastedTokens.toLocaleString()} output tokens\n`);
+    for (const s of ov.sessions) {
+      lines.push(
+        `• [${s.result.grade}] ${s.result.score}/100 — "${s.title}" (${s.userTurns} turns, ` +
+          `${s.result.metrics.reworkSignals} rework, completeness ${s.result.metrics.firstPromptCompleteness}/100)`,
+      );
+    }
+    if (ov.topTips.length) {
+      lines.push(`\nTop tips:`);
+      for (const t of ov.topTips) lines.push(`  → ${t}`);
+    }
+    return { ...text(lines.join("\n")), structuredContent: ov as unknown as Record<string, unknown> };
+  },
+);
+
 // ── set_scenario ──────────────────────────────────────────────────────────────
 server.registerTool(
   "set_scenario",
@@ -243,6 +278,31 @@ server.registerTool(
       `Recorded ${added} assistant turn(s) as ESTIMATED usage (≈${inTok.toLocaleString()} in / ${outTok.toLocaleString()} out).\n` +
         `${formatImpact(r)}\n⚠ Estimated via BPE proxy (not exact) — Claude's tokenizer is not public.`,
     );
+  },
+);
+
+// ── generate_dashboard ────────────────────────────────────────────────────────
+server.registerTool(
+  "generate_dashboard",
+  {
+    title: "Generate visual dashboard",
+    description:
+      "Build a standalone HTML dashboard (charts of energy/carbon/water over time and by model) from your recorded usage. Returns the file path to open in a browser.",
+    inputSchema: {
+      path: z.string().optional().describe("Output .html path. Defaults to ~/.ai-impact/dashboard.html."),
+      scenario: z.enum(SCENARIOS).optional(),
+      days: z.number().int().min(1).max(365).default(30),
+    },
+  },
+  async (a) => {
+    const out = a.path ?? join(homedir(), ".ai-impact", "dashboard.html");
+    const html = buildDashboardHtml(store, {
+      scenario: (a.scenario as Scenario) ?? defaultScenario(),
+      now: nowMs(),
+      days: a.days ?? 30,
+    });
+    writeFileSync(out, html, "utf8");
+    return text(`Dashboard written to ${out}\nOpen it in a browser to view your AI footprint.`);
   },
 );
 

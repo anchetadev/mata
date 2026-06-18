@@ -1,9 +1,11 @@
-# AI Impact MCP
+# 👁 Mata — see your AI footprint
 
 An **MCP server** that estimates the environmental footprint of your AI use —
 **energy (kWh), miles driven in a gas car, water used for cooling, and CO₂** —
-plus a **prompt-efficiency score**. It works with any AI client (Claude, Codex,
+plus a **prompt-efficiency coach**. It works with any AI client (Claude, Codex,
 others) because it measures token usage, not a specific vendor.
+
+*Mata* is Tagalog for **eye** — the tool that lets you see what's normally invisible.
 
 > The impact math is a TypeScript port of the
 > [EcoLogits](https://ecologits.ai/) life-cycle methodology (CC BY-SA 4.0).
@@ -19,100 +21,152 @@ in a big warehouse (a "data center") does the thinking. That computer burns
 the computer gets hot, so the data center uses **water** to cool it down. Most
 people have no idea how much — it's invisible.
 
-**Our tool makes it visible.** It's like a **fitness tracker, but for your AI
-use.** Just like a Fitbit counts your steps and turns them into "calories
-burned," this tool counts the AI's words and turns them into:
+**Mata makes it visible.** Like a **fitness tracker for your AI use**: it counts
+the AI's words and turns them into:
 
 - ⚡ **Energy** used (in kWh, like your electric bill)
-- 🚗 **Miles driven** in a gas car that would pollute the same amount (the
-  relatable part!)
+- 🚗 **Miles driven** in a gas car that would pollute the same amount
 - 💧 **Water** used to cool the computers
 - 🔤 **Words in and out** (tokens)
 
-**The bonus feature** is like a coach for your homework. If you ask the AI to
-"make a thing," then have to correct it five times, that wasted a lot of energy.
-The tool gives you an **efficiency score** (0–100) and tips like *"say exactly
-what you want up front to avoid the back-and-forth."*
+**Bonus — a prompt coach.** If you ask the AI to "make a thing" then correct it
+five times, that wasted energy. Mata scores how efficiently you set up your work
+(0–100) and gives tips to get more done in fewer prompts.
 
-**Why it's special:** It doesn't care *which* AI you use — Claude, Codex,
-anything. It watches the words, so it works with all of them. (Other tools, like
-EcoLogits, only work if you're a programmer writing special code — ours is meant
-to just watch what you actually do.)
-
----
+**Why it's different:** it doesn't care *which* AI you use — it watches the
+words, so it works across Claude, Codex, and more. Everything stays on your
+machine, and it stores word-counts, never your chats.
 
 ## The tech stack (explained simply)
 
-Think of the project as a **kitchen** that turns raw ingredients (AI
-word-counts) into a finished meal (the impact numbers):
+A **kitchen** that turns raw ingredients (AI word-counts) into a finished meal
+(the impact numbers):
 
 | Part | What it is | Kitchen analogy |
 |---|---|---|
-| **TypeScript** | The language we write everything in | The language the cooks speak |
-| **MCP (Model Context Protocol)** | The standard "plug" that lets AI apps use our tool | The outlet every appliance fits |
-| **The engine** (EcoLogits port) | The math turning words → energy/carbon/water | The **recipe**, from expert scientists |
-| **Two data files** | Facts about each AI model and each country's power grid | The **cookbook** of ingredient facts |
-| **SQLite** (built into Node) | A tiny database that remembers your usage, on your computer | The **fridge** where we store ingredients |
-| **The tools** | The buttons an AI can press: estimate, log, report, score, settings | The **kitchen appliances** |
-| **Node.js** | The program that runs all of it | The **stove** everything cooks on |
-
-Two things worth knowing:
-
-- **Everything stays on your computer.** We store only word-counts, never your
-  actual chats. (Like a fridge only you can open.)
-- **We borrowed the recipe honestly.** The math comes from a respected
-  non-profit (EcoLogits). Their recipe has a sharing rule (the CC BY-SA
-  license), so we credit them.
+| **TypeScript** | The language it's written in | The language the cooks speak |
+| **MCP** | The standard plug that lets AI apps use the tool | The outlet every appliance fits |
+| **Impact engine** (EcoLogits port) | The math: words → energy/carbon/water | The recipe, from expert scientists |
+| **Data files** | Facts about each model + each country's grid | The cookbook of ingredient facts |
+| **SQLite** (built into Node) | Local database of your usage | The fridge |
+| **Collectors** | Watch your AI tools and record usage | The eyes 👁 |
+| **Node.js** | Runs all of it | The stove |
 
 ---
 
-## Try it (developer preview)
+## Installation
 
 Requires **Node ≥ 22.5** (uses the built-in `node:sqlite` — no native build step).
 
 ```bash
+git clone https://github.com/anchetadev/mata.git
+cd mata
 npm install
 npm run build
-npm test          # 31 tests
+npm test          # 35 tests
 ```
 
-Add the MCP server to Claude Desktop / Claude Code (`claude_desktop_config.json`):
+### Add to an MCP host
+
+**Claude Desktop** (`claude_desktop_config.json`) or **Claude Code** (`.mcp.json` / `claude mcp add`):
 
 ```json
 {
   "mcpServers": {
-    "ai-impact": { "command": "node", "args": ["/absolute/path/to/dist/server.js"] }
+    "mata": { "command": "node", "args": ["/absolute/path/to/mata/dist/server.js"] }
   }
 }
 ```
 
-Optional collectors:
+The same `dist/server.js` works in any MCP-compatible host (Cursor, Cline, etc.).
+
+### Optional collectors (run alongside)
 
 ```bash
-node dist/proxy-server.js   # local proxy: capture exact usage from API clients
-node dist/tail-server.js    # watch Claude Code logs and record exact usage
+node dist/tail-server.js       # watch Claude Code logs, record EXACT usage live
+node dist/proxy-server.js      # local proxy: capture EXACT usage from API clients
+node dist/dashboard-server.js  # write the HTML dashboard
 ```
 
-> Full install/usage docs and a "how invasive is it?" breakdown are still being
-> written — see **Coming later**.
+For the proxy, point a client at it:
+
+```bash
+ANTHROPIC_BASE_URL=http://localhost:8788   # Claude Code, Anthropic SDK
+OPENAI_BASE_URL=http://localhost:8788/v1   # Codex, OpenAI SDK
+```
+
+---
+
+## Usage
+
+Once connected, ask your host things like *"estimate the impact of a 2000-token
+reply from claude-opus-4-5"* or *"show my AI impact report for this week."*
+
+### Tools
+
+| Tool | What it does | Try saying |
+|---|---|---|
+| `estimate_impact` | Impact of one request from token counts | "Estimate impact of 8k in / 2k out on gpt-4o" |
+| `log_usage` | Manually record a usage event | "Log 500 output tokens from claude-haiku-4-5" |
+| `report` | Totals for today/week/month/all, by model | "Show my AI impact this week" |
+| `scan_logs` | Backfill exact usage from Claude Code logs | "Scan my Claude Code logs" |
+| `analyze_efficiency` | Coach your recent real sessions | "How efficient were my last 5 sessions?" |
+| `efficiency_score` | Score a conversation you pass in | "Score the efficiency of this chat" |
+| `record_web_chat` | Record estimated usage for claude.ai chat | "Record this web conversation's impact" |
+| `generate_dashboard` | Build a standalone HTML dashboard | "Generate my impact dashboard" |
+| `set_scenario` | conservative / midpoint / high estimate | "Set the scenario to conservative" |
+
+Resource: `impact://methodology` — how the numbers are derived.
+
+### CLI binaries
+
+| Command | Purpose |
+|---|---|
+| `ai-impact-mcp` | The MCP server (stdio) |
+| `ai-impact-tail` | Backfill + watch Claude Code logs |
+| `ai-impact-proxy` | Local LLM proxy collector |
+| `ai-impact-dashboard` | Generate the HTML dashboard |
+
+---
+
+## How invasive is it?
+
+Short answer: **as little as possible, and entirely on your machine.** Mata
+stores **token counts and metadata — never the content of your messages** — in a
+local SQLite file at `~/.ai-impact/usage.db`. No telemetry, no network calls
+except the proxy forwarding to the provider *you* chose.
+
+Each capture method is opt-in and differs in what it can see:
+
+| Method | What it reads | What it does NOT do | Fidelity |
+|---|---|---|---|
+| **Claude Code tailer** (`scan_logs`, `ai-impact-tail`) | `~/.claude/projects/*.jsonl` — model, token counts, timestamps | Store your prompts/replies; send anything anywhere | **Exact** |
+| **Local proxy** (`ai-impact-proxy`) | Usage from API traffic *you* route through it | Intercept anything you don't point at it; alter responses | **Exact** |
+| **Efficiency coach** (`analyze_efficiency`) | Transcript text, on-demand, to detect rework/clarifications | Persist the text — it's read, scored, and discarded | Exact tokens |
+| **Web estimator** (`record_web_chat`) | Conversation text you/the host pass in | Auto-read your browser; access anything unprompted | **Estimated** (re-tokenized) |
+
+What it **cannot** see: the Claude desktop/web apps talk to Anthropic directly,
+so Mata can't passively read them — the web estimator only sees what you choose
+to hand it. The proxy only sees clients you explicitly repoint.
+
+Every record is tagged `exact` or `estimated`, and estimates use a public BPE
+tokenizer as a stand-in (Claude's isn't public), so they carry ~±10% error.
+
+---
+
+## Accuracy & honesty
+
+These are **order-of-magnitude estimates**, good for "which of my habits cost
+the most" — not carbon accounting. Closed-model parameters are inferred; consumer
+surfaces are re-tokenized. The tool shows its assumptions in every result and
+ships full sources in [METHODOLOGY.md](METHODOLOGY.md).
 
 ## License
 
 Dual-licensed (see [LICENSE](LICENSE) and [NOTICE](NOTICE)):
 
-- **Original code** (MCP server, collectors, scorer) — **MIT**.
+- **Original code** (server, collectors, scorer, dashboard) — **MIT**.
 - **Impact engine + vendored data** (ported from [EcoLogits](https://ecologits.ai/)) —
-  **CC BY-SA 4.0** (attribution + share-alike). Modifications to those files
-  must stay CC BY-SA.
+  **CC BY-SA 4.0** (attribution + share-alike).
 
-## Coming later
-
-This README will grow to include:
-
-- **Installation** — how to add it to Claude Desktop / Claude Code / other hosts
-- **Usage** — the available tools and example prompts
-- **How invasive is it?** — exactly what each capture method can and can't see,
-  and what stays private
-
-_(Tabled for now — see [METHODOLOGY.md](METHODOLOGY.md) for the science in the
-meantime.)_
+Publishing guidance for your own fork: [PUBLISHING.md](PUBLISHING.md).
