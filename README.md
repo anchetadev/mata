@@ -5,7 +5,7 @@ An **MCP server** that estimates the environmental footprint of your AI use —
 plus a **prompt-efficiency coach**. It works with any AI client (Claude, Codex,
 others) because it measures token usage, not a specific vendor.
 
-*Mata* is Tagalog for **eye** — the tool that lets you see what's normally invisible.
+*Mata* is Tagalog for **eye** — in the spirit of seeing what's there.
 
 > The impact math is a TypeScript port of the
 > [EcoLogits](https://ecologits.ai/) life-cycle methodology (CC BY-SA 4.0).
@@ -93,7 +93,7 @@ git clone https://github.com/anchetadev/mata.git
 cd mata
 npm install
 npm run build
-npm test          # 35 tests
+npm test          # 36 tests
 ```
 
 ### Add to an MCP host
@@ -125,6 +125,38 @@ For the proxy, point a client at it:
 ANTHROPIC_BASE_URL=http://localhost:8788   # Claude Code, Anthropic SDK
 OPENAI_BASE_URL=http://localhost:8788/v1   # Codex, OpenAI SDK
 ```
+
+---
+
+## Quick start
+
+Already installed and built? Two commands get you from zero to seeing your
+footprint:
+
+```bash
+node dist/tail-server.js     # backfills your Claude Code history, then watches live
+node dist/serve-server.js    # opens a live dashboard at http://localhost:8799
+```
+
+The first reads your existing `~/.claude` logs (token counts only — never your
+messages) and keeps recording new activity. The second opens your browser to an
+always-current dashboard. That's ~90% of the value.
+
+**Prefer to drive it from your AI host?** If you added Mata as an MCP server, just say:
+
+- *"Scan my Claude Code logs"* → backfill your history
+- *"Serve my live dashboard"* → get a live `localhost` URL
+- *"Show my AI impact this week"* → a text report
+- *"How efficient were my last 5 sessions?"* → prompt coaching
+
+**Want to capture non-Claude-Code tools too?** Run the proxy and point a client at it:
+
+```bash
+node dist/proxy-server.js    # then set ANTHROPIC_BASE_URL / OPENAI_BASE_URL=http://localhost:8788
+```
+
+> If you installed globally (`npm link` or `npm i -g`), use the bare commands
+> instead — `ai-impact-tail`, `ai-impact-serve`, `ai-impact-proxy`.
 
 ---
 
