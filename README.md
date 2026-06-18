@@ -155,6 +155,18 @@ always-current dashboard. That's ~90% of the value.
 node dist/proxy-server.js    # then set ANTHROPIC_BASE_URL / OPENAI_BASE_URL=http://localhost:8788
 ```
 
+**Stopping a server.** `tail`, `serve`, and `proxy` run in the foreground —
+press **Ctrl+C** in their terminal to stop them cleanly. If you started one in
+the background, stop it by its port (`8799` = dashboard, `8788` = proxy):
+
+```bash
+# Windows (PowerShell)
+Get-Process -Id (Get-NetTCPConnection -LocalPort 8799).OwningProcess | Stop-Process
+
+# macOS / Linux
+kill $(lsof -ti:8799)
+```
+
 > If you installed globally (`npm link` or `npm i -g`), use the bare commands
 > instead — `ai-impact-tail`, `ai-impact-serve`, `ai-impact-proxy`.
 
