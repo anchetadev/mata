@@ -127,8 +127,8 @@ ${opts.autoRefreshSeconds ? `<meta http-equiv="refresh" content="${opts.autoRefr
   body{margin:0;background:var(--bg);color:var(--fg);font:15px/1.5 -apple-system,Segoe UI,Roboto,sans-serif;padding:28px}
   h1{margin:0 0 2px;font-size:24px}.sub{color:var(--muted);margin:0 0 22px}
   .eye{color:var(--accent)}
-  .cards{display:flex;flex-wrap:wrap;gap:14px;margin-bottom:26px}
-  .card{background:var(--panel);border:1px solid #21262d;border-radius:12px;padding:16px 20px;min-width:150px;flex:1}
+  .cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:14px;margin-bottom:26px}
+  .card{background:var(--panel);border:1px solid #21262d;border-radius:12px;padding:16px 20px}
   .ico{font-size:20px}.val{font-size:26px;font-weight:700;margin-top:6px}.lab{color:var(--muted);font-size:13px}
   .panel{background:var(--panel);border:1px solid #21262d;border-radius:12px;padding:18px 20px;margin-bottom:20px}
   .panel h2{margin:0 0 14px;font-size:15px;font-weight:600;color:var(--fg)}
@@ -138,6 +138,16 @@ ${opts.autoRefreshSeconds ? `<meta http-equiv="refresh" content="${opts.autoRefr
   .empty{color:var(--muted)}
   footer{color:var(--muted);font-size:12px;margin-top:8px}
   code{background:#21262d;padding:1px 5px;border-radius:4px}
+  @media(max-width:600px){
+    body{padding:16px}
+    h1{font-size:20px}
+    .sub{font-size:13px}
+    .cards{grid-template-columns:repeat(2,1fr);gap:10px}
+    .card{padding:12px 14px}
+    .val{font-size:21px}
+    .panel{padding:14px 16px}
+  }
+  @media(max-width:380px){ .cards{grid-template-columns:1fr} }
 </style></head><body>
   <h1><span class="eye">👁 Mata</span> — your AI footprint</h1>
   <p class="sub">${total.tokensOut.toLocaleString()} output tokens across ${rollup.reduce((n, r) => n + r.events, 0).toLocaleString()} requests · <em>${scenario}</em> scenario</p>

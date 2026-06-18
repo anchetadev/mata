@@ -16,6 +16,9 @@ test("dashboard renders standalone HTML with headline metrics", () => {
   assert.match(html, /Miles driven/);
   assert.match(html, /claude-opus-4-5/);
   assert.match(html, /<svg/); // charts present
+  assert.match(html, /@media\(max-width:600px\)/); // mobile responsive
+  assert.match(html, /width=device-width/); // viewport meta
+  assert.match(html, /grid-template-columns:repeat\(auto-fit/); // fluid card grid
   store.close();
 });
 
