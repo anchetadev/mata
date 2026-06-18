@@ -1,0 +1,47 @@
+ai-impact-mcp — third-party attribution and licensing
+=======================================================
+
+This project combines original code with material derived from EcoLogits.
+The two carry different licenses. Distributing this project means complying
+with BOTH.
+
+────────────────────────────────────────────────────────────────────────────
+1. Original code — MIT (see LICENSE)
+────────────────────────────────────────────────────────────────────────────
+Everything EXCEPT the files listed in section 2:
+  - the MCP server, tools, collectors (proxy, Claude Code tailer, web estimator)
+  - the efficiency scorer, reporting, datastore
+Copyright (c) 2026 Angel Ancheta. Licensed under the MIT License.
+
+────────────────────────────────────────────────────────────────────────────
+2. Derived from EcoLogits — CC BY-SA 4.0
+────────────────────────────────────────────────────────────────────────────
+The environmental-impact methodology and data are ported/vendored from
+EcoLogits and are licensed under Creative Commons Attribution-ShareAlike 4.0
+International (CC BY-SA 4.0): https://creativecommons.org/licenses/by-sa/4.0/
+
+Covered files:
+  - src/engine/ecologits.ts        (port of the EcoLogits LCA formulas)
+  - src/engine/coefficients.ts     (if present; derived constants)
+  - src/engine/data/models.json            (vendored verbatim)
+  - src/engine/data/electricity_mixes.json (vendored verbatim)
+
+Attribution:
+  EcoLogits, by GenAI Impact / CodeCarbon.
+  Samuel Rincé and Adrien Banse (2025). "EcoLogits: Evaluating the
+  Environmental Impacts of Generative AI." Journal of Open Source Software,
+  10(111), 7471. https://doi.org/10.21105/joss.07471
+  Project: https://ecologits.ai/  •  Source: https://github.com/mlco2/ecologits
+
+ShareAlike obligation: modifications to the covered files (section 2) must be
+distributed under CC BY-SA 4.0 with attribution preserved.
+
+────────────────────────────────────────────────────────────────────────────
+3. Tokenizer
+────────────────────────────────────────────────────────────────────────────
+Token estimation for surfaces that don't expose counts uses gpt-tokenizer
+(cl100k BPE) as an APPROXIMATION — Anthropic's tokenizer is not public. These
+counts are estimates and are tagged "estimated" in all output.
+
+This is attribution/licensing information, not legal advice. If you intend to
+relicense or commercialize, confirm the CC BY-SA obligations with counsel.

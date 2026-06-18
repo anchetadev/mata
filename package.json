@@ -1,0 +1,58 @@
+{
+  "name": "ai-impact-mcp",
+  "version": "0.1.0",
+  "description": "LLM-agnostic MCP server that estimates the environmental impact of AI use (energy, carbon, water, driving-miles equivalent) and scores prompt efficiency.",
+  "type": "module",
+  "bin": {
+    "ai-impact-mcp": "dist/server.js",
+    "ai-impact-proxy": "dist/proxy-server.js",
+    "ai-impact-tail": "dist/tail-server.js"
+  },
+  "main": "dist/index.js",
+  "files": [
+    "dist",
+    "README.md",
+    "METHODOLOGY.md",
+    "NOTICE"
+  ],
+  "scripts": {
+    "build": "tsc && node scripts/copy-data.mjs",
+    "dev": "tsc --watch",
+    "start": "node dist/server.js",
+    "test": "node --import tsx --test test/*.test.ts",
+    "typecheck": "tsc --noEmit",
+    "prepublishOnly": "npm run build && npm test"
+  },
+  "keywords": [
+    "mcp",
+    "model-context-protocol",
+    "ai",
+    "environmental-impact",
+    "carbon",
+    "energy",
+    "llm"
+  ],
+  "license": "MIT AND CC-BY-SA-4.0",
+  "author": "Angel Ancheta <anchetadev@gmail.com>",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/YOUR_GITHUB_USERNAME/ai-impact-mcp.git"
+  },
+  "bugs": {
+    "url": "https://github.com/YOUR_GITHUB_USERNAME/ai-impact-mcp/issues"
+  },
+  "homepage": "https://github.com/YOUR_GITHUB_USERNAME/ai-impact-mcp#readme",
+  "engines": {
+    "node": ">=22.5"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.0.4",
+    "gpt-tokenizer": "^2.9.0",
+    "zod": "^3.24.1"
+  },
+  "devDependencies": {
+    "@types/node": "^22.10.2",
+    "tsx": "^4.19.2",
+    "typescript": "^5.7.2"
+  }
+}
