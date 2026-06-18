@@ -28,6 +28,8 @@ import { buildReport, renderReport, type Period } from "./reporting.js";
 import { scoreEfficiency, type Turn } from "./efficiency/score.js";
 import { analyzeRecentSessions } from "./efficiency/session.js";
 import { buildDashboardHtml } from "./dashboard.js";
+import { startDashboardServer } from "./dashboard-serve.js";
+import type { Server } from "node:http";
 import { scanDir } from "./collectors/claude-code-collector.js";
 import { estimateTurns, type ChatTurn } from "./collectors/estimate.js";
 import { parseWebTranscript } from "./collectors/claude-web-parse.js";
@@ -303,6 +305,33 @@ server.registerTool(
     });
     writeFileSync(out, html, "utf8");
     return text(`Dashboard written to ${out}\nOpen it in a browser to view your AI footprint.`);
+  },
+);
+
+// ── serve_dashboard ───────────────────────────────────────────────────────────
+let liveServer: { server: Server; port: number } | null = null;
+server.registerTool(
+  "serve_dashboard",
+  {
+    title: "Serve the live dashboard",
+    description:
+      "Start a local web server that serves an always-current dashboard (regenerates on every request, auto-refreshes). Returns a localhost URL to open. Calling again returns the existing URL.",
+    inputSchema: {
+      port: z.number().int().min(1).max(65535).optional().describe("Port (default 8799)."),
+      refresh_seconds: z.number().int().min(0).max(3600).default(30).describe("Auto-refresh interval; 0 disables."),
+    },
+  },
+  async (a) => {
+    if (!liveServer) {
+      liveServer = await startDashboardServer({
+        store,
+        scenario: defaultScenario(),
+        refreshSeconds: a.refresh_seconds ?? 30,
+        port: a.port,
+      });
+    }
+    const url = `http://localhost:${liveServer.port}`;
+    return text(`Live dashboard running at ${url}\nOpen it in a browser — it auto-refreshes and always reflects your latest recorded usage.`);
   },
 );
 

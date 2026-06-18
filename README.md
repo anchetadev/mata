@@ -115,7 +115,8 @@ The same `dist/server.js` works in any MCP-compatible host (Cursor, Cline, etc.)
 ```bash
 node dist/tail-server.js       # watch Claude Code logs, record EXACT usage live
 node dist/proxy-server.js      # local proxy: capture EXACT usage from API clients
-node dist/dashboard-server.js  # write the HTML dashboard
+node dist/dashboard-server.js  # write a static HTML dashboard file
+node dist/serve-server.js      # live dashboard at http://localhost:8799 (auto-updates)
 ```
 
 For the proxy, point a client at it:
@@ -143,7 +144,8 @@ reply from claude-opus-4-5"* or *"show my AI impact report for this week."*
 | `analyze_efficiency` | Coach your recent real sessions | "How efficient were my last 5 sessions?" |
 | `efficiency_score` | Score a conversation you pass in | "Score the efficiency of this chat" |
 | `record_web_chat` | Record estimated usage for claude.ai chat | "Record this web conversation's impact" |
-| `generate_dashboard` | Build a standalone HTML dashboard | "Generate my impact dashboard" |
+| `generate_dashboard` | Build a standalone HTML dashboard file | "Generate my impact dashboard" |
+| `serve_dashboard` | Start a live, always-current dashboard server | "Serve my live dashboard" |
 | `set_scenario` | conservative / midpoint / high estimate | "Set the scenario to conservative" |
 
 Resource: `impact://methodology` — how the numbers are derived.
@@ -155,7 +157,8 @@ Resource: `impact://methodology` — how the numbers are derived.
 | `ai-impact-mcp` | The MCP server (stdio) |
 | `ai-impact-tail` | Backfill + watch Claude Code logs |
 | `ai-impact-proxy` | Local LLM proxy collector |
-| `ai-impact-dashboard` | Generate the HTML dashboard |
+| `ai-impact-dashboard` | Generate a static HTML dashboard file |
+| `ai-impact-serve` | Live, always-current dashboard web server (auto-opens browser) |
 
 ---
 

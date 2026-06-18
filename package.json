@@ -7,7 +7,8 @@
     "ai-impact-mcp": "dist/server.js",
     "ai-impact-proxy": "dist/proxy-server.js",
     "ai-impact-tail": "dist/tail-server.js",
-    "ai-impact-dashboard": "dist/dashboard-server.js"
+    "ai-impact-dashboard": "dist/dashboard-server.js",
+    "ai-impact-serve": "dist/serve-server.js"
   },
   "main": "dist/index.js",
   "files": [

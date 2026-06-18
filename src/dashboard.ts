@@ -13,6 +13,8 @@ export interface DashboardOptions {
   now?: number;
   /** Days of history to chart. */
   days?: number;
+  /** If set, inject a meta-refresh so a served page auto-updates every N seconds. */
+  autoRefreshSeconds?: number;
 }
 
 const esc = (s: string) => s.replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" })[c]!);
@@ -117,6 +119,7 @@ export function buildDashboardHtml(store: ImpactStore, opts: DashboardOptions = 
 
   return `<!doctype html>
 <html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+${opts.autoRefreshSeconds ? `<meta http-equiv="refresh" content="${opts.autoRefreshSeconds}">` : ""}
 <title>Mata — your AI footprint</title>
 <style>
   :root{--bg:#0d1117;--panel:#161b22;--fg:#e6edf3;--muted:#8b949e;--accent:#3fb950;--bar:#2ea043;--col:#388bfd}
