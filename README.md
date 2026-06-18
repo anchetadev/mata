@@ -52,6 +52,36 @@ A **kitchen** that turns raw ingredients (AI word-counts) into a finished meal
 | **Collectors** | Watch your AI tools and record usage | The eyes 👁 |
 | **Node.js** | Runs all of it | The stove |
 
+## Runs without AI (overhead ≈ 0)
+
+A tool that measures AI's footprint shouldn't burn AI to do it. Mata's entire
+pipeline — capturing usage, doing the math, scoring efficiency, drawing the
+dashboard — is **deterministic**. Nothing in the data path calls an LLM.
+
+| Part | What it does | AI calls? |
+|---|---|---|
+| Impact engine, reporting, store | Arithmetic + lookup tables | **None** |
+| Efficiency scorer | Regex + heuristics | **None** |
+| Log tailer / `scan_logs` | JSONL parsing | **None** |
+| Proxy collector | Relays *your* traffic, reads usage off it | **None of its own** |
+| Web estimator | `gpt-tokenizer` (a local, offline token counter — not a model) | **None** |
+| Dashboard | Plain HTML + SVG | **None** |
+
+Runtime dependencies are just `@modelcontextprotocol/sdk`, `gpt-tokenizer`, and
+`zod` — none of which make AI or network calls.
+
+**Run it with zero AI in the loop.** The three standalone binaries need no LLM host:
+
+```bash
+ai-impact-tail        # watch Claude Code logs and record usage
+ai-impact-proxy       # capture exact usage from API clients
+ai-impact-dashboard   # render the HTML dashboard
+```
+
+**One honest caveat:** if you *talk* to Mata through an AI assistant
+("show me my report"), that chat turn is the **host's** LLM call — Mata's own
+tools add nothing. Fittingly, Mata would measure that turn too. 🙂
+
 ---
 
 ## Installation
