@@ -27,9 +27,9 @@ function openBrowser(url: string): void {
 async function main() {
   const store = new ImpactStore();
   const scenario = (store.getSetting("scenario") as any) ?? "midpoint";
-  const { server, port } = await startDashboardServer({ store, scenario, refreshSeconds: 30 });
+  const { server, port } = await startDashboardServer({ store, scenario, refreshSeconds: 300 });
   const url = `http://localhost:${port}`;
-  console.error(`Mata dashboard live at ${url}  (auto-refreshes every 30s)`);
+  console.error(`Mata dashboard live at ${url}  (auto-refreshes every 5 min)`);
   if (!process.argv.includes("--no-open")) openBrowser(url);
 
   const shutdown = () => {

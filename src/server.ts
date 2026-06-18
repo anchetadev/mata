@@ -318,7 +318,7 @@ server.registerTool(
       "Start a local web server that serves an always-current dashboard (regenerates on every request, auto-refreshes). Returns a localhost URL to open. Calling again returns the existing URL.",
     inputSchema: {
       port: z.number().int().min(1).max(65535).optional().describe("Port (default 8799)."),
-      refresh_seconds: z.number().int().min(0).max(3600).default(30).describe("Auto-refresh interval; 0 disables."),
+      refresh_seconds: z.number().int().min(0).max(3600).default(300).describe("Auto-refresh interval in seconds; 0 disables. Default 300 (5 min)."),
     },
   },
   async (a) => {
@@ -326,7 +326,7 @@ server.registerTool(
       liveServer = await startDashboardServer({
         store,
         scenario: defaultScenario(),
-        refreshSeconds: a.refresh_seconds ?? 30,
+        refreshSeconds: a.refresh_seconds ?? 300,
         port: a.port,
       });
     }

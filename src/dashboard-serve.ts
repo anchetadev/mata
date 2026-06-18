@@ -21,7 +21,7 @@ export interface ServeOptions {
 
 /** Create (but don't start) a live dashboard HTTP server. */
 export function createDashboardServer(opts: ServeOptions): Server {
-  const refresh = opts.refreshSeconds ?? 30;
+  const refresh = opts.refreshSeconds ?? 300;
   return createServer((req, res) => {
     const url = (req.url ?? "/").split("?")[0];
     if (url === "/healthz") {
